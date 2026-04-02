@@ -307,6 +307,30 @@ print(df["retailer"].value_counts().to_string())
 
 print(f"\n✓ Data fetched: {fetch_date}")
 
+from folium import Element
+
+# This JavaScript snippet tells the map to look for ?lat=, &lon=, and &zoom= in the URL
+js_listener = """
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const params = new URLSearchParams(window.location.search);
+    const lat = params.get('lat');
+    const lon = params.get('lon');
+    const zoom = params.get('zoom');
+    
+    if (lat && lon) {
+        // Folium randomly names the map variable (e.g., map_12345), so we find it dynamically
+        for (let key in window) {
+            if (key.startsWith('map_') && window[key] instanceof L.Map) {
+                window[key].setView([parseFloat(lat), parseFloat(lon)], zoom ? parseInt(zoom) : 12);
+            }
+        }
+    }
+});
+</script>
+"""
+m.get_root().html.add_child(Element(js_listener))
+
 # Save the map as a standalone webpage
 m.save("index.html")
 print("Map successfully updated and saved!")
