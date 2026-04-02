@@ -308,5 +308,5 @@ print(df["retailer"].value_counts().to_string())
 print(f"\n✓ Data fetched: {fetch_date}")
 
 # Save the map as a standalone webpage
-m.save("scotland_fuel_map.html")
+m.save("index.html")
 print("Map successfully updated and saved!")
