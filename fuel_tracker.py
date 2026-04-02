@@ -309,24 +309,25 @@ print(f"\n✓ Data fetched: {fetch_date}")
 
 from folium import Element
 
-# This JavaScript snippet tells the map to look for ?lat=, &lon=, and &zoom= in the URL
+# Updated JS: Waits for full window load and safely checks for the map object
 js_listener = """
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const lat = params.get('lat');
     const lon = params.get('lon');
     const zoom = params.get('zoom');
     
     if (lat && lon) {
-        // Folium randomly names the map variable (e.g., map_12345), so we find it dynamically
+        // Find the Folium map object safely
         for (let key in window) {
-            if (key.startsWith('map_') && window[key] instanceof L.Map) {
+            if (key.startsWith('map_') && window[key] && window[key].setView) {
                 window[key].setView([parseFloat(lat), parseFloat(lon)], zoom ? parseInt(zoom) : 12);
+                break;
             }
         }
     }
-});
+};
 </script>
 """
 m.get_root().html.add_child(Element(js_listener))
