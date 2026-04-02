@@ -307,31 +307,35 @@ print(df["retailer"].value_counts().to_string())
 
 print(f"\n✓ Data fetched: {fetch_date}")
 
+# ---------------------------------------------------------
+# DYNAMIC CENTERING SCRIPT
+# ---------------------------------------------------------
 from folium import Element
 
-# Updated JS: Waits for full window load and safely checks for the map object
-js_listener = """
+# Get the exact Javascript variable name Folium generated for this map
+map_var_name = m.get_name()
+
+# Inject a safe script using Folium's exact variable
+js_listener = f"""
 <script>
-window.onload = function() {
-    const params = new URLSearchParams(window.location.search);
-    const lat = params.get('lat');
-    const lon = params.get('lon');
-    const zoom = params.get('zoom');
-    
-    if (lat && lon) {
-        // Find the Folium map object safely
-        for (let key in window) {
-            if (key.startsWith('map_') && window[key] && window[key].setView) {
-                window[key].setView([parseFloat(lat), parseFloat(lon)], zoom ? parseInt(zoom) : 12);
-                break;
-            }
-        }
-    }
-};
+document.addEventListener("DOMContentLoaded", function() {{
+    // Wait 250ms to ensure Leaflet has completely finished building the map
+    setTimeout(function() {{
+        const params = new URLSearchParams(window.location.search);
+        const lat = params.get('lat');
+        const lon = params.get('lon');
+        const zoom = params.get('zoom');
+        
+        // If lat and lon are found in the URL, move the map!
+        if (lat && lon && typeof {map_var_name} !== 'undefined') {{
+            {map_var_name}.setView([parseFloat(lat), parseFloat(lon)], zoom ? parseInt(zoom) : 12);
+        }}
+    }}, 250); 
+}});
 </script>
 """
 m.get_root().html.add_child(Element(js_listener))
 
-# Save the map as a standalone webpage
+# Finally, save the map!
 m.save("index.html")
 print("Map successfully updated and saved!")
