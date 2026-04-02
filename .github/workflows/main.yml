@@ -1,0 +1,37 @@
+name: Update Fuel Map
+
+on:
+  schedule:
+    # Note: Cloud servers run on UTC. 
+    # During British Summer Time (BST), 09:30 UTC = 10:30 AM UK time
+    # and 13:00 UTC = 2:00 PM UK time.
+    - cron: '30 9 * * *'
+    - cron: '0 13 * * *'
+  workflow_dispatch: # This line adds a button so you can run it manually anytime!
+
+jobs:
+  update-map:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script to generate map
+        run: python fuel_tracker.py
+
+      - name: Commit and push the new map
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Map Bot"
+          git add index.html
+          git diff-index --quiet HEAD || git commit -m "Auto-update fuel map"
+          git push
